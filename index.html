@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Telco Churn Prediction</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #ffffff;
+      margin-top: 40px;
+      padding: 24px 32px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      max-width: 480px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #111827;
+    }
+
+    .form-row {
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 14px;
+      color: #374151;
+      margin-bottom: 4px;
+    }
+
+    select,
+    input[type="number"] {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+    }
+
+    select:focus,
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+    }
+
+    button {
+      margin-top: 8px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background: #2563eb;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    button:hover {
+      background: #1d4ed8;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    #result {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #111827;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Telco Customer Churn Prediction</h1>
+
+    <form id="churn-form">
+      <div class="form-row">
+        <label>Gender</label>
+        <select name="gender">
+          <option value="0">Female</option>
+          <option value="1">Male</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Partner</label>
+        <select name="Partner">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Dependents</label>
+        <select name="Dependents">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Phone Service</label>
+        <select name="PhoneService">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Internet Service</label>
+        <select name="InternetService">
+          <option value="0">No</option>
+          <option value="1">DSL</option>
+          <option value="2">Fiber optic</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Contract</label>
+        <select name="Contract">
+          <option value="0">Month-to-month</option>
+          <option value="1">One year</option>
+          <option value="2">Two year</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Tenure (months)</label>
+        <input type="number" name="tenure" value="12">
+      </div>
+
+      <div class="form-row">
+        <label>Monthly Charges</label>
+        <input type="number" step="0.01" name="MonthlyCharges" value="70">
+      </div>
+
+      <div class="form-row">
+        <label>Total Charges</label>
+        <input type="number" step="0.01" name="TotalCharges" value="900">
+      </div>
+
+      <div class="form-row">
+        <label>Tenure group</label>
+        <input type="number" name="tenure_group" value="2">
+      </div>
+
+      <div class="form-row">
+        <label>Charges ratio</label>
+        <input type="number" step="0.01" name="charges_ratio" value="0.1">
+      </div>
+
+      <button type="submit">Predict churn</button>
+    </form>
+
+    <h2 id="result"></h2>
+  </div>
+
+  <script>
+    document.getElementById("churn-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const payload = Object.fromEntries(formData.entries());
+
+      [
+        "tenure",
+        "MonthlyCharges",
+        "TotalCharges",
+        "tenure_group",
+        "charges_ratio",
+        "gender",
+        "Partner",
+        "Dependents",
+        "PhoneService",
+        "InternetService",
+        "Contract"
+      ].forEach(f => {
+        payload[f] = Number(payload[f]);
+      });
+
+      const response = await fetch("/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      document.getElementById("result").innerText =
+        "Churn probability: " + data.churn_probability.toFixed(3) +
+        " | Risk: " + data.risk_level;
+    });
+  </script>
+</body>
+</html>
